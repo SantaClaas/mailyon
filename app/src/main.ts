@@ -1,32 +1,65 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/electron-vite.svg'
-import { setupCounter } from './counter.ts'
+// Add types for document.startViewTransition for use in this file. See https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html#-reference-types- for more info.
+/// <reference types="view-transitions-api-types" />
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://electron-vite.github.io" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
-
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+import { TemplateResult, html, render } from "lit-html";
+import "./style.css";
+import { Command, Program } from "@claas.dev/framework";
 
 // Remove Preload scripts loading
-postMessage({ payload: 'removeLoading' }, '*')
+postMessage({ payload: "removeLoading" }, "*");
 
 // Use contextBridge
-window.ipcRenderer.on('main-process-message', (_event, message) => {
-  console.log(message)
-})
+window.ipcRenderer.on("main-process-message", (_event, message) => {
+  console.log(message);
+});
+
+type Message = "increment";
+type Model = {
+  count: number;
+};
+function initialize(): [Model, Command.Command<Message>] {
+  return [{ count: 0 }, Command.none];
+}
+
+function view(
+  model: Model,
+  dispatch: Command.Dispatch<Message>
+): TemplateResult {
+  console.log("view", model.count);
+  return html`
+    <h1>Counter</h1>
+    <p>Count ${model.count}</p>
+    <button @click=${() => dispatch("increment")}>Increment</button>
+  `;
+}
+
+function update(
+  message: Message,
+  model: Model
+): [Model, Command.Command<Message>] {
+  switch (message) {
+    case "increment":
+      return [{ count: model.count + 1 }, Command.none];
+  }
+  return [model, Command.none];
+}
+
+function setState(model: Model, dispatch: Command.Dispatch<Message>) {
+  const template = view(model, dispatch);
+
+  if (!document.startViewTransition) {
+    render(template, document.body);
+    return;
+  }
+
+  document.startViewTransition(() => {
+    render(template, document.body);
+    return Promise.resolve();
+  });
+}
+
+let program = Program.makeProgram(initialize, update, view);
+
+program = Program.withSetState(setState, program);
+
+Program.run(program);
