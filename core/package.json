@@ -24,8 +24,9 @@
   },
   "scripts": {
     "artifacts": "napi artifacts",
-    "build": "napi build --platform --release",
-    "build:debug": "napi build --platform",
+    "ensure-dist": "mkdir -p ./dist",
+    "build": "npm run ensure-dist && napi build --platform --release --js ./dist/index.js --dts ./dist/index.d.ts",
+    "build:debug": "npm run ensure-dist && napi build --platform --js ./dist/index.js --dts ./dist/index.d.ts",
     "prepublishOnly": "napi prepublish -t npm",
     "test": "ava",
     "universal": "napi universal",
