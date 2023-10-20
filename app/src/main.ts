@@ -13,7 +13,7 @@ window.ipcRenderer.on("main-process-message", (_event, message) => {
   console.log(message);
 });
 
-type Message = "increment";
+type Message = "increment" | "sum";
 type Model = {
   count: number;
 };
@@ -30,6 +30,7 @@ function view(
     <h1>Counter</h1>
     <p>Count ${model.count}</p>
     <button @click=${() => dispatch("increment")}>Increment</button>
+    <button @click=${() => dispatch("sum")}>Sum</button>
   `;
 }
 
@@ -40,8 +41,10 @@ function update(
   switch (message) {
     case "increment":
       return [{ count: model.count + 1 }, Command.none];
+    case "sum":
+      window.ipcRenderer.send("sum", "sum");
+      return [model, Command.none];
   }
-  return [model, Command.none];
 }
 
 function setState(model: Model, dispatch: Command.Dispatch<Message>) {

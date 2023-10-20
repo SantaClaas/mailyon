@@ -1,5 +1,7 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
+// import { sum } from "mailyon-core";
+const { sum } = require("mailyon-core");
 
 // The built directory structure
 //
@@ -34,6 +36,11 @@ function createWindow() {
       "main-process-message",
       new Date().toLocaleString()
     );
+  });
+
+  ipcMain.on("sum", () => {
+    const result = sum(1, 2);
+    console.log("Sum", result, typeof result);
   });
 
   if (VITE_DEV_SERVER_URL) {
