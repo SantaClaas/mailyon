@@ -15,6 +15,6 @@
   "workspaces": [
     "app/",
     "configuration/*",
-    "framework/"
+    "core/"
   ]
 }

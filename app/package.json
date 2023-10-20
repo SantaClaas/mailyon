@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@claas.dev/framework": "^0.0.3",
-    "lit-html": "^3.0.0"
+    "lit-html": "^3.0.0",
+    "@claas.dev/mailyon-core": "*"
   },
   "devDependencies": {
     "electron": "27.0.1",
